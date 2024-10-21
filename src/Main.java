@@ -15,9 +15,10 @@ public class Main {
     static class Producer implements Runnable {
         @Override
         public void run() {
-            lock.lock();
-            try {
-                for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 10; i++) {
+                lock.lock();
+                try {
+
                     while (queue.size() >= maxCount) {
                         condition.await();
                     }
@@ -27,11 +28,12 @@ public class Main {
                     // 在耗时任务前唤醒别的线程
                     condition.signal();
                     Thread.sleep(1000);
+
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    lock.unlock();
                 }
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            } finally {
-                lock.unlock();
             }
         }
     }
@@ -39,9 +41,10 @@ public class Main {
     static class Consumer  implements Runnable {
         @Override
         public void run() {
-            lock.lock();
-            try {
-                for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 10; i++) {
+                lock.lock();
+                try {
+
                     while (queue.isEmpty()) {
                         condition.await();
                     }
@@ -50,13 +53,13 @@ public class Main {
                     // 在耗时任务前唤醒别的线程
                     condition.signal();
                     Thread.sleep(1000);
-                }
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            } finally {
-                lock.unlock();
-            }
 
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    lock.unlock();
+                }
+            }
         }
     }
 
