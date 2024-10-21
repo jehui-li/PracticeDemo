@@ -18,21 +18,22 @@ public class Main {
             for (int i = 0; i < 10; i++) {
                 lock.lock();
                 try {
-
                     while (queue.size() >= maxCount) {
                         condition.await();
                     }
                     String e = Thread.currentThread().getId() + "：" + System.currentTimeMillis();
                     queue.offer(e);
                     System.out.println("生产 " + e);
-                    // 在耗时任务前唤醒别的线程
                     condition.signal();
-                    Thread.sleep(1000);
-
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 } finally {
                     lock.unlock();
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
             }
         }
@@ -44,20 +45,21 @@ public class Main {
             for (int i = 0; i < 10; i++) {
                 lock.lock();
                 try {
-
                     while (queue.isEmpty()) {
                         condition.await();
                     }
                     String e = queue.poll();
                     System.out.println(Thread.currentThread().getId() + " 消费 " + e);
-                    // 在耗时任务前唤醒别的线程
                     condition.signal();
-                    Thread.sleep(1000);
-
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 } finally {
                     lock.unlock();
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
             }
         }
